@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+.clip-top-left {
+  clip-path: polygon(0% 0%, 100% 0%, 50% 50%);
+}
+
+.clip-top-right {
+  clip-path: polygon(100% 0%, 100% 100%, 50% 50%);
+}
+
+.clip-bottom-right {
+  clip-path: polygon(100% 100%, 0% 100%, 50% 50%);
+}
+
+.clip-bottom-left {
+  clip-path: polygon(0% 100%, 0% 0%, 50% 50%);
+}
+
+@keyframes blink-turn {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.8; }
+  100% { opacity: 1; }
+}
+
+.blink-turn {
+  animation: blink-turn 0.5s infinite ease-in-out;
+}
+
+@keyframes ping-once {
+  0% {
+    transform: scale(0);
+    opacity: 0.75;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.animate-ping-once {
+  animation: ping-once 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1 forwards;
+}
+
+/* apply the animation */
+.base-blink {
+  animation: blink-dim-sharp 0.5s ease-in-out infinite;
+  /* small transition fallback for instant border changes when toggling */
+  transition: border-color 100ms ease;
+}
+
+/* dashed ring rotation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spin-ring {
+  animation: spin 5s linear infinite;
+}
+
+@keyframes dice-wobble {
+  0%   { transform: rotate(0deg); }
+  25%  { transform: rotate(12deg); }
+  50%  { transform: rotate(-10deg); }
+  75%  { transform: rotate(6deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.animate-dice-wobble {
+  animation: dice-wobble 0.25s linear infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+}
+
+.shadow-glass {
+  box-shadow: 
+    0 8px 32px rgba(31, 38, 135, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.shadow-glow {
+  box-shadow: 
+    0 0 10px rgba(59, 130, 246, 0.5),
+    0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
