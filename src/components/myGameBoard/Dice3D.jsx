@@ -231,67 +231,45 @@ function Dice({ isRolling, finalFace, onRollComplete }) {
 }
 
 // Main wrapper
-const DiceComponent = ({ disabled = false, diceValue = null, setDiceValue, size = 65 }) => {
+const DiceComponent = ({ disabled = false, diceValue = null, onRollClick, size = 65 }) => {
   const [isRolling, setIsRolling] = useState(false);
   const [finalFace, setFinalFace] = useState(diceValue ?? null);
   const finalFaceRef = useRef(diceValue ?? null);
 
-  // 👉 does parent control the value?
-  const hasExternalValue = diceValue !== null && diceValue !== undefined;
-
-  // If parent prop diceValue changes, reflect it locally (snap to it)
+  // If parent prop diceValue changes, start animation towards it
   useEffect(() => {
     if (diceValue !== undefined && diceValue !== null) {
-      // parent is telling us what to show → display mode
-      finalFaceRef.current = diceValue;
-      setFinalFace(diceValue);
-      setIsRolling(false);
+      if (!animationRef?.current?.isAnimating && finalFaceRef.current !== diceValue) {
+        startRoll(diceValue);
+        finalFaceRef.current = diceValue;
+        setFinalFace(diceValue);
+      }
     } else {
       // backend cleared dice → ready for local roll
       finalFaceRef.current = null;
       setFinalFace(null);
       setIsRolling(false);
     }
-  }, [diceValue]);
+  }, [diceValue, startRoll]);
 
-  const rollDice = () => {
-    // ❌ don't roll if:
-    // - already rolling
-    // - disabled
-    // - parent already provided a value
-    if (isRolling || disabled || hasExternalValue) return;
-
-    // const face = Math.floor(1 + Math.random() * 6);
-    const face = 5;
-    finalFaceRef.current = face;
-    setFinalFace(face);
-    setIsRolling(true);
-  };
+  // Dice rolling is now triggered externally
+  const rollDice = () => {};
 
   const handleRollComplete = (observedFace) => {
-    // Only notify parent if WE initiated the roll (i.e. no external value)
-    if (!hasExternalValue && observedFace != null && typeof setDiceValue === "function") {
-      setDiceValue(observedFace);
-    }
     setIsRolling(false);
-
-    // If you want the die to “rest” on the last face visually, comment this out:
-    // setFinalFace(null);
-    // finalFaceRef.current = null;
   };
 
   return (
     <Canvas
       camera={{ position: [0, 0, 2], fov: 70 }}
       shadows
-      onClick={rollDice}
+      onClick={() => { if (!disabled && onRollClick) onRollClick(); }}
       style={{
         width: `${size}px`,
         height: `${size}px`,
         borderRadius: "8px",
         overflow: "visible",
-        opacity: disabled ? 0.5 : 1,
-        cursor: disabled || hasExternalValue ? "default" : "pointer",
+        cursor: disabled ? "default" : "pointer",
         display: "block",
       }}
     >

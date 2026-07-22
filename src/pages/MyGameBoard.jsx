@@ -296,6 +296,7 @@ const GameBoard = () => {
   // 2) Create socket once
   useEffect(() => {
     const s = io(import.meta.env.VITE_API_URL,{
+      auth: { token: localStorage.getItem('token') },
       autoConnect: true,
       reconnection: true,
       reconnectionAttempts: Infinity,
@@ -315,9 +316,7 @@ const GameBoard = () => {
     if (!s || !user) return;
 
     const join = () => {
-      const payload = {
-        player_id: user?.id,
-      };
+      const payload = {}; // Identity is securely injected by JWT on backend
       try {
         s.emit("joinGame", payload, (ack) => {
 
@@ -623,7 +622,7 @@ const GameBoard = () => {
           setAllDiceValues(mergeDice);
 
           if (player_id === userRef.current?.id) {
-            setDiceValue(null);
+            // DO NOT clear diceValue here, let backend event diceCleared handle it natively if moves complete
             skipRollEmitRef.current = false;
             lastRolledRef.current = null;
             unlockMove("animation done", pawn_id);
@@ -688,7 +687,7 @@ const GameBoard = () => {
 
     // We want to show a timer for whoever's turn it is
     // (If you only want for "me", you can check if currentTurnPlayerId === userRef.current?.id)
-    const TOTAL = 30; // seconds
+    const TOTAL = Number(import.meta.env.VITE_TURN_TIMER_SECONDS) || 30; // seconds
     setTurnSecondsLeft(TOTAL);
 
     const start_time = Date.now();
@@ -709,7 +708,7 @@ const GameBoard = () => {
     return () => {
       clearInterval(intervalId);
     };
-  }, [turnState?.mode, turnState?.currentTurnPlayerId]);
+  }, [turnState?.mode, turnState?.currentTurnPlayerId, turnState?.timerNonce]);
 
 
   const pawnsGroupedByPlayer = useMemo(() => {
@@ -774,26 +773,23 @@ const GameBoard = () => {
     return ordered;
   }, [pawns]);
 
-  useEffect(() => {
-    if (diceValue === null || skipRollEmitRef.current || isAnimatingRef.current) return;
-    if (lastRolledRef.current === diceValue) return;
+  // Triggered manually when the player clicks the dice component
+  const handleRollDice = () => {
+    if (diceValue !== null || skipRollEmitRef.current || isAnimatingRef.current) return;
 
     const payload = {
       board_id: boardId,
-      player_id: user?.id,
-      dice_value: diceValue,
     };
 
-    lastRolledRef.current = diceValue;
-
     socketRef.current?.emit("rollDice", payload, (ack) => {
-      // console.log("roll Dice ack:", ack);
       if (!ack?.ok) {
         console.log("Roll rejected:", ack?.msg);
-        lastRolledRef.current = null;
+      } else {
+        // Backend generated the dice roll! We pass it to our Dice component to animate towards
+        setDiceValue(ack.dice_value);
       }
     });
-  }, [diceValue, pawnsGroupedByPlayer, user?.id, boardId]);
+  };
 
   // ===== main move handler =====
   const movePawn = useCallback((pawn_id) => {
@@ -827,9 +823,7 @@ const GameBoard = () => {
   const emitMoveToServer = (boardId, pawn_id, player_id, diceValue) => {
     const payload = {
       board_id: boardId,
-      pawn_id,
-      player_id,
-      dice_value: diceValue
+      pawn_id
     };
 
     // console.log("Emitting movePawn:", payload);
@@ -945,7 +939,7 @@ const GameBoard = () => {
           <Dice
             disabled={!canActuallyRoll}
             diceValue={diceValue}
-            setDiceValue={setDiceValue}
+            onRollClick={handleRollDice}
             size={70}
           />
         </div>

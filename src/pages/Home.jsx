@@ -28,9 +28,11 @@ export default function Home() {
   const handleCreateGame = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/game/createGame`, {
-        username: user.id
-      });
+      const token = localStorage.getItem('token');
+      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/game/createGame`, 
+        {}, // No body needed
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       if (data.success) {
         localStorage.setItem("currentBoard", JSON.stringify({
           board_id: data.board_id,
@@ -55,10 +57,11 @@ export default function Home() {
     }
     setLoading(true);
     try {
-      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/game/joinGame`, {
-        username: user.id,
-        board_id: joinBoardId
-      });
+      const token = localStorage.getItem('token');
+      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/game/joinGame`, 
+        { board_id: joinBoardId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       if (data.success) {
         // Find assigned color by refetching or just pass defaults (assuming first to join gets blue/green etc)
         // Since play component socket fetches pawns, we only strictly need boardId.
