@@ -605,6 +605,7 @@ const GameBoard = () => {
           setAllDiceValues(mergeDice);
 
           if (player_id === userRef.current?.id) {
+            setDiceValue(null);
             skipRollEmitRef.current = false;
             lastRolledRef.current = null;
             unlockMove("no valid path", pawn_id);
@@ -622,7 +623,7 @@ const GameBoard = () => {
           setAllDiceValues(mergeDice);
 
           if (player_id === userRef.current?.id) {
-            // DO NOT clear diceValue here, let backend event diceCleared handle it natively if moves complete
+            setDiceValue(null);
             skipRollEmitRef.current = false;
             lastRolledRef.current = null;
             unlockMove("animation done", pawn_id);
@@ -638,7 +639,15 @@ const GameBoard = () => {
     };
 
     const onPlayerStatsUpdated = (data) => {
-      setPlayerStats(data);
+      setPlayerStats((prev) => {
+        if (!prev || prev.length === 0) return data;
+        const map = new Map(prev.map((p) => [p.player_id, p]));
+        for (const u of data) {
+          const old = map.get(u.player_id) || {};
+          map.set(u.player_id, { ...old, ...u });
+        }
+        return Array.from(map.values());
+      });
     };
 
     s.on("connect", onConnect);

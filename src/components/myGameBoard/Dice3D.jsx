@@ -239,8 +239,8 @@ const DiceComponent = ({ disabled = false, diceValue = null, onRollClick, size =
   // If parent prop diceValue changes, start animation towards it
   useEffect(() => {
     if (diceValue !== undefined && diceValue !== null) {
-      if (!animationRef?.current?.isAnimating && finalFaceRef.current !== diceValue) {
-        startRoll(diceValue);
+      if (finalFaceRef.current !== diceValue) {
+        setIsRolling(true);
         finalFaceRef.current = diceValue;
         setFinalFace(diceValue);
       }
@@ -250,7 +250,7 @@ const DiceComponent = ({ disabled = false, diceValue = null, onRollClick, size =
       setFinalFace(null);
       setIsRolling(false);
     }
-  }, [diceValue, startRoll]);
+  }, [diceValue]);
 
   // Dice rolling is now triggered externally
   const rollDice = () => {};
