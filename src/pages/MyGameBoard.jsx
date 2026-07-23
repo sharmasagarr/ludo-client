@@ -1,13 +1,9 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import BoardGrid from "../components/myGameBoard/BoardGrid";
 import Dice from "../components/myGameBoard/Dice3D";
-import DiceForOther from "../components/myGameBoard/Dice3DForOther";
 import { io } from "socket.io-client";
 import toast from "react-hot-toast";
-import { getMyColor, transformGroupedPlayers } from "../utils/gameView";
-import { shouldAutoClearDice } from "../utils/shouldAutoClearDice";
-import { FaCrown } from 'react-icons/fa';
-import {formatPlayerName} from "../utils/formatPlayerName";
+import { transformGroupedPlayers } from "../utils/gameView";
 import InviteOverlay from "../components/myGameBoard/InviteOverlay";
 import StatsModal from "../components/myGameBoard/StatsModal";
 

@@ -19,9 +19,9 @@ const getRowOffset = (idx, total) => {
 };
 
 const isFinished = (pawn) => {
-  if (pawn.type === "base" || pawn.type === "main") return false;
+  if (pawn.type === "base" || pawn.type === "main" || pawn.type === "home") return false;
   const pos = pawn.current_position;
-  return pos === "finished" || pawn.type === "home" || pawn.type === "center" || (typeof pos === "string" && /-id-(?:null|19)$/.test(pos));
+  return pos === "finished" || pawn.type === "center" || (typeof pos === "string" && /-id-(?:null|19)$/.test(pos));
 };
 
 // pawnsGroupedByPlayer: { player_id: { color: "blue", pawns: [ { id, color, current_position, ... }, ... ] } }
@@ -57,7 +57,7 @@ const HomeArea = ({ pawnsGroupedByPlayer = {} }) => {
           key={`${color}-${pawn.id}`}
           src={`/gameAssets/pawn-${color}.png`}
           alt={`finished-${color}`}
-          className="w-5 h-5 absolute transition-all duration-300"
+          className="w-5 h-auto absolute transition-all duration-300"
           style={{
             top: `${basePos.top}%`,
             left: `calc(${basePos.left}% + ${offset}%)`,
